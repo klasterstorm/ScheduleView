@@ -3,14 +3,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "ScheduleView",
+    name: "MailScheduleView",
     platforms: [
         .iOS(.v14)
     ],
     products: [
         .library(
-            name: "ScheduleView",
-            targets: ["ScheduleView"]
+            name: "MailScheduleView",
+            targets: ["MailScheduleView"]
         ),
     ],
     dependencies: [
@@ -18,16 +18,16 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "ScheduleView"
+            name: "MailScheduleView"
         ),
         .testTarget(
-            name: "ScheduleViewTests",
-            dependencies: ["ScheduleView"]
+            name: "MailScheduleViewTests",
+            dependencies: ["MailScheduleView"]
         ),
         .testTarget(
-            name: "ScheduleViewSnapshotTests",
+            name: "MailScheduleViewSnapshotTests",
             dependencies: [
-                "ScheduleView",
+                "MailScheduleView",
                 .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
             ]
         ),

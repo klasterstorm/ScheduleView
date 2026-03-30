@@ -1,5 +1,5 @@
 import XCTest
-@testable import ScheduleView
+@testable import MailScheduleView
 
 final class ScheduleEventRepresentableTests: XCTestCase {
 

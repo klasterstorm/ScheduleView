@@ -1,5 +1,5 @@
 import Foundation
-@testable import ScheduleView
+@testable import MailScheduleView
 
 /// Тестовая модель события
 struct TestEvent: IScheduleEvent, Equatable {

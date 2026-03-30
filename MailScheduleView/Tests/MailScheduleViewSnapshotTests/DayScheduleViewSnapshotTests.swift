@@ -1,6 +1,6 @@
 import XCTest
 import SnapshotTesting
-@testable import ScheduleView
+@testable import MailScheduleView
 
 final class DayScheduleViewSnapshotTests: XCTestCase {
 
