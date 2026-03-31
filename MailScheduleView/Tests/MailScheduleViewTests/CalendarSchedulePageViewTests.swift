@@ -173,7 +173,7 @@ final class CalendarSchedulePageViewTests: XCTestCase {
 
     // MARK: - onDateChanged
 
-    func testOnDateChangedCalledOnScroll() {
+    func testOnDateChangedNotCalledOnProgrammaticScroll() {
         let pageView = CalendarSchedulePageView(initialDate: makeDate(day: 25))
         var receivedDates: [Date] = []
         pageView.onDateChanged = { date in
@@ -182,8 +182,8 @@ final class CalendarSchedulePageViewTests: XCTestCase {
 
         pageView.scroll(to: makeDate(day: 28))
 
-        XCTAssertEqual(receivedDates.count, 1)
-        XCTAssertEqual(Calendar.current.component(.day, from: receivedDates[0]), 28)
+        // onDateChanged срабатывает только на свайп, не на программный scroll(to:)
+        XCTAssertEqual(receivedDates.count, 0)
     }
 
     // MARK: - Config пробрасывается в создаваемые VC

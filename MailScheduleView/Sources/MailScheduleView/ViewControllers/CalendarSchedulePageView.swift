@@ -19,7 +19,6 @@ public final class CalendarSchedulePageView: UIView, ICalendarSchedulePageView {
         let vc = makeViewController(for: date)
         pageViewController.setViewControllers([vc], direction: .forward, animated: false)
         currentDate = date
-        onDateChanged?(date)
         delegate?.eventsRequested(for: vc)
     }
 
