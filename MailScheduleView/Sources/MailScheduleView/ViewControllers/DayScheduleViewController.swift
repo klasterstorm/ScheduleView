@@ -17,25 +17,27 @@ public final class DayScheduleViewController: UIViewController, IScheduleViewCon
 
     public let dateRange: ScheduleDateRange
 
-    public func showEvents(events: [ExampleCalendarEvent]) {
-        dayView.events = events
+    public func showEvents(
+        events: [IScheduleEvent],
+        viewForEvent: @escaping (IScheduleEvent) -> UIView,
+        onEventTapped: ((IScheduleEvent) -> Void)?
+    ) {
+        dayView.viewForEvent = { anyEvent in viewForEvent(anyEvent.wrapped) }
+        dayView.onEventTapped = onEventTapped.map { handler in
+            { anyEvent in handler(anyEvent.wrapped) }
+        }
+        dayView.events = events.map { AnyScheduleEvent($0) }
     }
 
-    public func showAllDayEvents(events: [ExampleCalendarEvent]) {
+    public func showAllDayEvents(
+        events: [IScheduleEvent],
+        viewForEvent: @escaping (IScheduleEvent) -> UIView,
+        onEventTapped: ((IScheduleEvent) -> Void)?
+    ) {
         // TODO: секция all-day событий
     }
 
     // MARK: - Public
-
-    /// Фабрика view для события
-    public var viewForEvent: ((ExampleCalendarEvent) -> UIView)? {
-        didSet { dayView.viewForEvent = viewForEvent }
-    }
-
-    /// Вызывается при нажатии на событие
-    public var onEventTapped: ((ExampleCalendarEvent) -> Void)? {
-        didSet { dayView.onEventTapped = onEventTapped }
-    }
 
     /// Конфигурация расписания
     public var config: ScheduleConfig {
@@ -65,7 +67,7 @@ public final class DayScheduleViewController: UIViewController, IScheduleViewCon
 
     // MARK: - Internal (доступно для тестирования через @testable import)
 
-    let dayView = DayScheduleView<ExampleCalendarEvent>()
+    let dayView = DayScheduleView<AnyScheduleEvent>()
     let scrollView = UIScrollView()
 
     /// Провайдер текущей даты — проброс к `timeTracker` (для тестируемости)

@@ -26,7 +26,7 @@ final class WeekScheduleViewControllerTests: XCTestCase {
             ExampleCalendarEvent(startDate: makeDate(day: 23, hour: 9), endDate: makeDate(day: 23, hour: 10), title: "Понедельник"),
             ExampleCalendarEvent(startDate: makeDate(day: 25, hour: 14), endDate: makeDate(day: 25, hour: 15), title: "Среда"),
         ]
-        vc.showEvents(events: events)
+        vc.showEvents(events: events, viewForEvent: { _ in UIView() }, onEventTapped: nil)
 
         XCTAssertEqual(vc.weekView.events.count, 2)
     }

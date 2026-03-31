@@ -39,12 +39,6 @@ public final class CalendarSchedulePageView: UIView, ICalendarSchedulePageView {
         }
     }
 
-    /// Фабрика view для события — пробрасывается в создаваемые контроллеры
-    public var viewForEvent: ((ExampleCalendarEvent) -> UIView)?
-
-    /// Вызывается при нажатии на событие
-    public var onEventTapped: ((ExampleCalendarEvent) -> Void)?
-
     /// Конфигурация расписания
     public var config = ScheduleConfig()
 
@@ -120,18 +114,14 @@ public final class CalendarSchedulePageView: UIView, ICalendarSchedulePageView {
         return vc
     }
 
-    /// Пробрасывает конфиг, фабрику, колбэки и начальную позицию скролла.
+    /// Пробрасывает конфиг и начальную позицию скролла.
     private func configureViewController(_ vc: IScheduleViewController) {
         if let dayVC = vc as? DayScheduleViewController {
             dayVC.config = config
             dayVC.timelineConfig = timelineConfig
-            dayVC.viewForEvent = viewForEvent
-            dayVC.onEventTapped = onEventTapped
         } else if let weekVC = vc as? WeekScheduleViewController {
             weekVC.config = config
             weekVC.timelineConfig = timelineConfig
-            weekVC.viewForEvent = viewForEvent
-            weekVC.onEventTapped = onEventTapped
         }
         // nil → VC сам скроллит к текущему времени в viewDidLayoutSubviews
         vc.initialScrollOffsetY = savedScrollOffsetY

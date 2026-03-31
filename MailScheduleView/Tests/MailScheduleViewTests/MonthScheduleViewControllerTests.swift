@@ -58,8 +58,9 @@ final class MonthScheduleViewControllerTests: XCTestCase {
         let events = [
             ExampleCalendarEvent(startDate: makeDate(day: 15, hour: 9), endDate: makeDate(day: 15, hour: 10), title: "Test"),
         ]
-        vc.showEvents(events: events)
-        vc.showAllDayEvents(events: events)
+        let factory: (IScheduleEvent) -> UIView = { _ in UIView() }
+        vc.showEvents(events: events, viewForEvent: factory, onEventTapped: nil)
+        vc.showAllDayEvents(events: events, viewForEvent: factory, onEventTapped: nil)
         // Просто проверяем что не крашится
     }
 }

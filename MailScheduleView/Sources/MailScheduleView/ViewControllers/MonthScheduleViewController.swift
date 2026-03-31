@@ -17,11 +17,19 @@ public final class MonthScheduleViewController: UIViewController, IScheduleViewC
 
     public let dateRange: ScheduleDateRange
 
-    public func showEvents(events: [ExampleCalendarEvent]) {
+    public func showEvents(
+        events: [IScheduleEvent],
+        viewForEvent: @escaping (IScheduleEvent) -> UIView,
+        onEventTapped: ((IScheduleEvent) -> Void)?
+    ) {
         // TODO: реализовать отображение событий в месячном виде
     }
 
-    public func showAllDayEvents(events: [ExampleCalendarEvent]) {
+    public func showAllDayEvents(
+        events: [IScheduleEvent],
+        viewForEvent: @escaping (IScheduleEvent) -> UIView,
+        onEventTapped: ((IScheduleEvent) -> Void)?
+    ) {
         // TODO: реализовать отображение all-day событий
     }
 

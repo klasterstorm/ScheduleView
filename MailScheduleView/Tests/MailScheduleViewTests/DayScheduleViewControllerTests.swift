@@ -22,44 +22,45 @@ final class DayScheduleViewControllerTests: XCTestCase {
         let vc = DayScheduleViewController(date: makeDate(day: 25))
         vc.loadViewIfNeeded()
 
-        let events = [
+        let events: [IScheduleEvent] = [
             ExampleCalendarEvent(startDate: makeDate(day: 25, hour: 9), endDate: makeDate(day: 25, hour: 10), title: "Встреча"),
             ExampleCalendarEvent(startDate: makeDate(day: 25, hour: 14), endDate: makeDate(day: 25, hour: 15), title: "Обед"),
         ]
-        vc.showEvents(events: events)
+        vc.showEvents(events: events, viewForEvent: { _ in UIView() }, onEventTapped: nil)
 
         XCTAssertEqual(vc.dayView.events.count, 2)
     }
 
-    // MARK: - viewForEvent
+    // MARK: - viewForEvent вызывается через showEvents
 
-    func testViewForEventIsForwarded() {
+    func testViewForEventIsCalledFromShowEvents() {
         let vc = DayScheduleViewController(date: makeDate(day: 25))
         vc.loadViewIfNeeded()
 
         var callCount = 0
-        vc.viewForEvent = { _ in
-            callCount += 1
-            return UIView()
-        }
-
-        vc.showEvents(events: [
-            ExampleCalendarEvent(startDate: makeDate(day: 25, hour: 9), endDate: makeDate(day: 25, hour: 10), title: "Test"),
-        ])
+        vc.showEvents(
+            events: [ExampleCalendarEvent(startDate: makeDate(day: 25, hour: 9), endDate: makeDate(day: 25, hour: 10), title: "Test")],
+            viewForEvent: { _ in
+                callCount += 1
+                return UIView()
+            },
+            onEventTapped: nil
+        )
 
         XCTAssertEqual(callCount, 1)
     }
 
-    // MARK: - onEventTapped
+    // MARK: - onEventTapped пробрасывается через showEvents
 
-    func testOnEventTappedIsForwarded() {
+    func testOnEventTappedIsSetFromShowEvents() {
         let vc = DayScheduleViewController(date: makeDate(day: 25))
         vc.loadViewIfNeeded()
 
-        var tappedTitle: String?
-        vc.onEventTapped = { event in
-            tappedTitle = event.title
-        }
+        vc.showEvents(
+            events: [ExampleCalendarEvent(startDate: makeDate(day: 25, hour: 9), endDate: makeDate(day: 25, hour: 10), title: "Test")],
+            viewForEvent: { _ in UIView() },
+            onEventTapped: { _ in }
+        )
 
         XCTAssertNotNil(vc.dayView.onEventTapped)
     }
