@@ -8,8 +8,8 @@ final class DayScheduleViewTests: XCTestCase {
     func testInitCreatesTimelineView() {
         let view = DayScheduleView<TestEvent>(frame: CGRect(x: 0, y: 0, width: 320, height: 1440))
 
-        // 1 subview — TimelineView
-        XCTAssertEqual(view.subviews.count, 1)
+        // 2 subviews — TimelineView + CurrentTimeIndicatorView
+        XCTAssertEqual(view.subviews.count, 2)
     }
 
     // MARK: - Intrinsic content size
@@ -156,9 +156,9 @@ final class DayScheduleViewTests: XCTestCase {
         ]
         view.layoutIfNeeded()
 
-        // subviews[0] = TimelineView, subviews[1..2] = events
-        let eventViewA = view.subviews[1]
-        let eventViewB = view.subviews[2]
+        // subviews[0] = TimelineView, subviews[1] = CurrentTimeIndicatorView, subviews[2..3] = events
+        let eventViewA = view.subviews[2]
+        let eventViewB = view.subviews[3]
 
         let eventsWidth = 320 - 50 - 4 // bounds.width - timeColumnWidth - 4
         let expectedColumnWidth = CGFloat(eventsWidth) / 2.0

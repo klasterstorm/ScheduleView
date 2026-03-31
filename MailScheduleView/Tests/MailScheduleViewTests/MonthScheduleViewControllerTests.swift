@@ -56,7 +56,7 @@ final class MonthScheduleViewControllerTests: XCTestCase {
         vc.loadViewIfNeeded()
 
         let events = [
-            CalendarEvent(startDate: makeDate(day: 15, hour: 9), endDate: makeDate(day: 15, hour: 10), title: "Test"),
+            ExampleCalendarEvent(startDate: makeDate(day: 15, hour: 9), endDate: makeDate(day: 15, hour: 10), title: "Test"),
         ]
         vc.showEvents(events: events)
         vc.showAllDayEvents(events: events)

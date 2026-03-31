@@ -15,6 +15,7 @@ public final class CalendarSchedulePageView: UIView, ICalendarSchedulePageView {
     public weak var delegate: ICalendarSchedulePageControllerDelegate?
 
     public func scroll(to date: Date) {
+        saveScrollOffset()
         let vc = makeViewController(for: date)
         pageViewController.setViewControllers([vc], direction: .forward, animated: false)
         currentDate = date
@@ -23,6 +24,12 @@ public final class CalendarSchedulePageView: UIView, ICalendarSchedulePageView {
     }
 
     // MARK: - Public
+
+    /// Скроллит текущую страницу расписания к текущему времени.
+    public func scrollToCurrentTime(animated: Bool = false) {
+        guard let vc = pageViewController.viewControllers?.first as? IScheduleViewController else { return }
+        vc.scrollToCurrentTime(animated: animated)
+    }
 
     /// Режим отображения: день, неделя или месяц
     public var displayMode: ScheduleDisplayMode = .day {
@@ -33,10 +40,10 @@ public final class CalendarSchedulePageView: UIView, ICalendarSchedulePageView {
     }
 
     /// Фабрика view для события — пробрасывается в создаваемые контроллеры
-    public var viewForEvent: ((CalendarEvent) -> UIView)?
+    public var viewForEvent: ((ExampleCalendarEvent) -> UIView)?
 
     /// Вызывается при нажатии на событие
-    public var onEventTapped: ((CalendarEvent) -> Void)?
+    public var onEventTapped: ((ExampleCalendarEvent) -> Void)?
 
     /// Конфигурация расписания
     public var config = ScheduleConfig()
@@ -47,7 +54,7 @@ public final class CalendarSchedulePageView: UIView, ICalendarSchedulePageView {
     /// Конфигурация таймлайна
     public var timelineConfig = TimelineConfig()
 
-    // MARK: - Internal
+    // MARK: - Internal (доступно для тестирования через @testable import)
 
     let pageViewController = UIPageViewController(
         transitionStyle: .scroll,
@@ -58,7 +65,10 @@ public final class CalendarSchedulePageView: UIView, ICalendarSchedulePageView {
     var currentDate: Date
 
     /// Календарь для расчёта дат
-    var calendar: Calendar = .current
+    private var calendar: Calendar = .current
+
+    /// Сохранённая позиция скролла (`nil` = первый показ → scrollToCurrentTime)
+    private var savedScrollOffsetY: CGFloat?
 
     // MARK: - Init
 
@@ -95,38 +105,42 @@ public final class CalendarSchedulePageView: UIView, ICalendarSchedulePageView {
 
     // MARK: - Фабрика контроллеров
 
-    func makeViewController(for date: Date) -> IScheduleViewController {
+    private func makeViewController(for date: Date) -> IScheduleViewController {
+        let vc: IScheduleViewController
         switch displayMode {
         case .day:
-            return makeDayViewController(for: date)
+            vc = DayScheduleViewController(date: date, calendar: calendar)
         case .week:
-            return makeWeekViewController(for: date)
+            let start = startOfWeek(for: date)
+            vc = WeekScheduleViewController(startOfWeek: start, calendar: calendar)
         case .month:
-            return makeMonthViewController(for: date)
+            vc = MonthScheduleViewController(date: date, calendar: calendar)
         }
-    }
-
-    private func makeDayViewController(for date: Date) -> DayScheduleViewController {
-        let vc = DayScheduleViewController(date: date, calendar: calendar)
-        vc.config = config
-        vc.timelineConfig = timelineConfig
-        vc.viewForEvent = viewForEvent
-        vc.onEventTapped = onEventTapped
+        configureViewController(vc)
         return vc
     }
 
-    private func makeWeekViewController(for date: Date) -> WeekScheduleViewController {
-        let startOfWeek = self.startOfWeek(for: date)
-        let vc = WeekScheduleViewController(startOfWeek: startOfWeek, calendar: calendar)
-        vc.config = config
-        vc.timelineConfig = timelineConfig
-        vc.viewForEvent = viewForEvent
-        vc.onEventTapped = onEventTapped
-        return vc
+    /// Пробрасывает конфиг, фабрику, колбэки и начальную позицию скролла.
+    private func configureViewController(_ vc: IScheduleViewController) {
+        if let dayVC = vc as? DayScheduleViewController {
+            dayVC.config = config
+            dayVC.timelineConfig = timelineConfig
+            dayVC.viewForEvent = viewForEvent
+            dayVC.onEventTapped = onEventTapped
+        } else if let weekVC = vc as? WeekScheduleViewController {
+            weekVC.config = config
+            weekVC.timelineConfig = timelineConfig
+            weekVC.viewForEvent = viewForEvent
+            weekVC.onEventTapped = onEventTapped
+        }
+        // nil → VC сам скроллит к текущему времени в viewDidLayoutSubviews
+        vc.initialScrollOffsetY = savedScrollOffsetY
     }
 
-    private func makeMonthViewController(for date: Date) -> MonthScheduleViewController {
-        return MonthScheduleViewController(date: date, calendar: calendar)
+    /// Сохраняет позицию скролла текущего VC.
+    private func saveScrollOffset() {
+        guard let vc = pageViewController.viewControllers?.first as? IScheduleViewController else { return }
+        savedScrollOffsetY = vc.scrollOffsetY
     }
 
     // MARK: - Навигация по датам
@@ -164,7 +178,7 @@ public final class CalendarSchedulePageView: UIView, ICalendarSchedulePageView {
     }
 
     /// Извлекает опорную дату из контроллера
-    func referenceDate(from viewController: UIViewController) -> Date? {
+    private func referenceDate(from viewController: UIViewController) -> Date? {
         guard let scheduleVC = viewController as? IScheduleViewController else { return nil }
         return scheduleVC.dateRange.startDate
     }
@@ -178,6 +192,7 @@ extension CalendarSchedulePageView: UIPageViewControllerDataSource {
         _ pageViewController: UIPageViewController,
         viewControllerBefore viewController: UIViewController
     ) -> UIViewController? {
+        saveScrollOffset()
         guard let date = referenceDate(from: viewController) else { return nil }
         let prevDate = previousDate(before: date)
         let vc = makeViewController(for: prevDate)
@@ -189,6 +204,7 @@ extension CalendarSchedulePageView: UIPageViewControllerDataSource {
         _ pageViewController: UIPageViewController,
         viewControllerAfter viewController: UIViewController
     ) -> UIViewController? {
+        saveScrollOffset()
         guard let date = referenceDate(from: viewController) else { return nil }
         let nextDate = nextDate(after: date)
         let vc = makeViewController(for: nextDate)

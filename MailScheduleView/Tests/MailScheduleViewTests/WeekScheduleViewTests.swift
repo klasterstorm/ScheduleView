@@ -8,8 +8,8 @@ final class WeekScheduleViewTests: XCTestCase {
     func testInitCreatesSubviews() {
         let view = WeekScheduleView<TestEvent>(frame: CGRect(x: 0, y: 0, width: 700, height: 1440))
 
-        // 1 TimelineView + 7 сепараторов + 1 UIStackView = 9 прямых subviews
-        XCTAssertEqual(view.subviews.count, 9)
+        // 1 TimelineView + 1 CurrentTimeIndicatorView + 7 сепараторов + 1 UIStackView = 10 прямых subviews
+        XCTAssertEqual(view.subviews.count, 10)
 
         // UIStackView содержит 7 DayScheduleView
         let stack = view.subviews.compactMap { $0 as? UIStackView }.first
@@ -99,14 +99,14 @@ final class WeekScheduleViewTests: XCTestCase {
         let stack = view.subviews.compactMap { $0 as? UIStackView }.first!
         let dayViews = stack.arrangedSubviews.compactMap { $0 as? DayScheduleView<DaySlice<TestEvent>> }
 
-        // Понедельник (индекс 0) — 1 событие (timeline subview + 1 event)
-        XCTAssertEqual(dayViews[0].subviews.count, 2)
+        // Понедельник (индекс 0) — 1 событие (timeline + indicator + 1 event)
+        XCTAssertEqual(dayViews[0].subviews.count, 3)
 
-        // Вторник (индекс 1) — 0 событий
-        XCTAssertEqual(dayViews[1].subviews.count, 1)
+        // Вторник (индекс 1) — 0 событий (timeline + indicator)
+        XCTAssertEqual(dayViews[1].subviews.count, 2)
 
-        // Среда (индекс 2) — 1 событие
-        XCTAssertEqual(dayViews[2].subviews.count, 2)
+        // Среда (индекс 2) — 1 событие (timeline + indicator + 1 event)
+        XCTAssertEqual(dayViews[2].subviews.count, 3)
     }
 
     // MARK: - viewForEvent получает оригинальное событие
@@ -141,7 +141,7 @@ final class WeekScheduleViewTests: XCTestCase {
         let dayViews = stack.arrangedSubviews.compactMap { $0 as? DayScheduleView<DaySlice<TestEvent>> }
 
         for dayView in dayViews {
-            XCTAssertEqual(dayView.subviews.count, 1)
+            XCTAssertEqual(dayView.subviews.count, 2)
         }
     }
 
@@ -159,14 +159,14 @@ final class WeekScheduleViewTests: XCTestCase {
         let stack = view.subviews.compactMap { $0 as? UIStackView }.first!
         let dayViews = stack.arrangedSubviews.compactMap { $0 as? DayScheduleView<DaySlice<TestEvent>> }
 
-        XCTAssertEqual(dayViews[0].subviews.count, 2)
+        XCTAssertEqual(dayViews[0].subviews.count, 3)
 
         // Сдвигаем неделю — событие уходит за пределы
         view.startOfWeek = makeDate(year: 2026, month: 3, day: 24)
         view.layoutIfNeeded()
 
         for dayView in dayViews {
-            XCTAssertEqual(dayView.subviews.count, 1)
+            XCTAssertEqual(dayView.subviews.count, 2)
         }
     }
 
@@ -184,7 +184,7 @@ final class WeekScheduleViewTests: XCTestCase {
         let stack = view.subviews.compactMap { $0 as? UIStackView }.first!
         let dayViews = stack.arrangedSubviews.compactMap { $0 as? DayScheduleView<DaySlice<TestEvent>> }
 
-        XCTAssertEqual(dayViews[0].subviews.count, 2)
+        XCTAssertEqual(dayViews[0].subviews.count, 3)
     }
 
     // MARK: - Инъекция resolver
@@ -202,6 +202,6 @@ final class WeekScheduleViewTests: XCTestCase {
         let dayViews = stack.arrangedSubviews.compactMap { $0 as? DayScheduleView<DaySlice<TestEvent>> }
 
         // Resolver корректно распределил событие
-        XCTAssertEqual(dayViews[0].subviews.count, 2)
+        XCTAssertEqual(dayViews[0].subviews.count, 3)
     }
 }

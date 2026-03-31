@@ -56,6 +56,9 @@ public final class WeekScheduleView<Event: IScheduleEvent>: UIView {
 
     private let resolver: EventDayResolver<Event>
     private let timelineView = TimelineView()
+    private let currentTimeIndicator = CurrentTimeIndicatorView()
+    private var currentMinutes: CGFloat = 0
+    private var hasCurrentTime = false
     private let dayColumnsStack = UIStackView()
     private var dayColumnSeparators: [UIView] = []
     private var dayViews: [DayScheduleView<DaySlice<Event>>] = []
@@ -97,12 +100,49 @@ public final class WeekScheduleView<Event: IScheduleEvent>: UIView {
             width: bounds.width - timelineConfig.eventsLeft, height: bounds.height
         )
         layoutSeparators()
+        layoutCurrentTimeIndicator()
+    }
+
+    // MARK: - Current time indicator
+
+    /// Устанавливает текущее время для индикатора.
+    /// Вызывается контроллером через `CurrentTimeTracker`.
+    /// - Parameter minutesSinceMidnight: минуты от полуночи (0–1439)
+    internal func setCurrentTime(minutesSinceMidnight: CGFloat) {
+        currentMinutes = minutesSinceMidnight
+        hasCurrentTime = true
+        setNeedsLayout()
+    }
+
+    private func layoutCurrentTimeIndicator() {
+        let indicatorConfig = config.currentTimeIndicator
+        let shouldShow = hasCurrentTime && !indicatorConfig.isHidden
+        currentTimeIndicator.isHidden = !shouldShow
+        guard shouldShow else { return }
+
+        let y = currentMinutes * config.minuteHeight
+        let r = indicatorConfig.circleRadius
+        let diameter = r * 2
+
+        currentTimeIndicator.configure(config: indicatorConfig)
+        currentTimeIndicator.frame = CGRect(
+            x: timelineConfig.eventsLeft - diameter,
+            y: y - r,
+            width: bounds.width - timelineConfig.eventsLeft + diameter,
+            height: diameter
+        )
+        currentTimeIndicator.layoutIndicator(
+            lineLeft: diameter,
+            lineWidth: bounds.width - timelineConfig.eventsLeft
+        )
+        bringSubviewToFront(currentTimeIndicator)
     }
 
     // MARK: - Setup
 
     private func setup() {
         addSubview(timelineView)
+        addSubview(currentTimeIndicator)
 
         for _ in 0..<7 {
             let sep = UIView()

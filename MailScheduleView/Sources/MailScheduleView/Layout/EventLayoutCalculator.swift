@@ -2,7 +2,10 @@ import UIKit
 
 // MARK: - Layout result
 
-struct EventLayout<Event: IScheduleEvent> {
+/// Результат расчёта колонки для одного события.
+///
+/// Содержит номер колонки и общее количество колонок в кластере пересекающихся событий.
+internal struct EventLayout<Event: IScheduleEvent> {
     let event: Event
     var column: Int
     var totalColumns: Int
@@ -10,10 +13,14 @@ struct EventLayout<Event: IScheduleEvent> {
 
 // MARK: - Overlap algorithm
 
+/// Кластеризует события и назначает колонки для пересекающихся событий.
+///
+/// Алгоритм: сортировка → кластеризация пересечений → жадное назначение колонок.
 /// - Parameter minDurationMinutes: минимальная визуальная длительность события в минутах.
-///   Используется для корректной кластеризации и назначения колонок,
-///   чтобы короткие события с минимальной высотой не налезали друг на друга.
-func layoutEvents<Event: IScheduleEvent>(
+///   Используется для корректной кластеризации, чтобы короткие события
+///   с минимальной высотой не налезали друг на друга.
+/// - Returns: массив `EventLayout` с номерами колонок
+internal func layoutEvents<Event: IScheduleEvent>(
     _ events: [Event],
     minDurationMinutes: CGFloat = 0,
     calendar: Calendar = .current
@@ -81,15 +88,17 @@ func layoutEvents<Event: IScheduleEvent>(
 
 // MARK: - Frame calculation
 
-/// Результат расчёта фрейма для одного события
-struct EventFrame {
+/// Результат расчёта фрейма для одного события.
+internal struct EventFrame {
     let index: Int
     var frame: CGRect
 }
 
-/// Чистая функция: рассчитывает фреймы событий на основе layout-данных.
-/// Включает логику сдвига пересекающихся событий в одной колонке.
-func calculateEventFrames<Event: IScheduleEvent>(
+/// Рассчитывает `CGRect` для каждого события на основе колоночной раскладки.
+///
+/// Чистая функция без побочных эффектов. Включает логику сдвига
+/// пересекающихся событий в одной колонке.
+internal func calculateEventFrames<Event: IScheduleEvent>(
     layouts: [EventLayout<Event>],
     containerWidth: CGFloat,
     leftOffset: CGFloat,

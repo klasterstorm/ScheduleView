@@ -7,20 +7,36 @@
 
 import UIKit
 
-/// Контроллер месячного расписания (заглушка).
+/// Контроллер месячного расписания.
+///
+/// Пока является заглушкой — отображает placeholder. В будущем будет показывать
+/// сетку дней месяца с индикаторами событий.
 public final class MonthScheduleViewController: UIViewController, IScheduleViewController {
 
     // MARK: - IScheduleViewController
 
     public let dateRange: ScheduleDateRange
 
-    public func showEvents(events: [CalendarEvent]) {
+    public func showEvents(events: [ExampleCalendarEvent]) {
         // TODO: реализовать отображение событий в месячном виде
     }
 
-    public func showAllDayEvents(events: [CalendarEvent]) {
+    public func showAllDayEvents(events: [ExampleCalendarEvent]) {
         // TODO: реализовать отображение all-day событий
     }
+
+    public func scrollToCurrentTime(animated: Bool) {
+        // TODO: реализовать скролл в месячном виде
+    }
+
+    /// Текущая вертикальная позиция скролла.
+    public var scrollOffsetY: CGFloat {
+        get { 0 }
+        set { }
+    }
+
+    /// Начальная позиция скролла.
+    public var initialScrollOffsetY: CGFloat?
 
     // MARK: - Init
 

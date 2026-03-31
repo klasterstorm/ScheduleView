@@ -7,30 +7,33 @@
 
 import UIKit
 
-/// Контроллер недельного расписания. Отображает одну неделю через WeekScheduleView.
+/// Контроллер недельного расписания.
+///
+/// Отображает одну неделю через `WeekScheduleView`, обёрнутый в `UIScrollView`.
+/// Автоматически показывает индикатор текущего времени и скроллит к нему при первом открытии.
 public final class WeekScheduleViewController: UIViewController, IScheduleViewController {
 
     // MARK: - IScheduleViewController
 
     public let dateRange: ScheduleDateRange
 
-    public func showEvents(events: [CalendarEvent]) {
+    public func showEvents(events: [ExampleCalendarEvent]) {
         weekView.events = events
     }
 
-    public func showAllDayEvents(events: [CalendarEvent]) {
+    public func showAllDayEvents(events: [ExampleCalendarEvent]) {
         // TODO: секция all-day событий
     }
 
     // MARK: - Public
 
     /// Фабрика view для события
-    public var viewForEvent: ((CalendarEvent) -> UIView)? {
+    public var viewForEvent: ((ExampleCalendarEvent) -> UIView)? {
         didSet { weekView.viewForEvent = viewForEvent }
     }
 
     /// Вызывается при нажатии на событие
-    public var onEventTapped: ((CalendarEvent) -> Void)? {
+    public var onEventTapped: ((ExampleCalendarEvent) -> Void)? {
         didSet { weekView.onEventTapped = onEventTapped }
     }
 
@@ -46,10 +49,35 @@ public final class WeekScheduleViewController: UIViewController, IScheduleViewCo
         set { weekView.timelineConfig = newValue }
     }
 
-    // MARK: - Internal
+    /// Скроллит к текущему времени (по центру видимой области).
+    public func scrollToCurrentTime(animated: Bool = true) {
+        timeTracker.scrollToCurrentTime(in: scrollView, minuteHeight: config.minuteHeight, animated: animated)
+    }
 
-    let weekView = WeekScheduleView<CalendarEvent>()
+    /// Текущая вертикальная позиция скролла.
+    public var scrollOffsetY: CGFloat {
+        get { scrollView.contentOffset.y }
+        set { scrollView.contentOffset.y = newValue }
+    }
+
+    /// Начальная позиция скролла. Если `nil` — скроллит к текущему времени.
+    public var initialScrollOffsetY: CGFloat?
+
+    // MARK: - Internal (доступно для тестирования через @testable import)
+
+    let weekView = WeekScheduleView<ExampleCalendarEvent>()
     let scrollView = UIScrollView()
+
+    /// Провайдер текущей даты — проброс к `timeTracker` (для тестируемости)
+    var currentDateProvider: () -> Date {
+        get { timeTracker.currentDateProvider }
+        set { timeTracker.currentDateProvider = newValue }
+    }
+
+    // MARK: - Private
+
+    private let timeTracker = CurrentTimeTracker()
+    private var didApplyInitialScroll = false
 
     // MARK: - Init
 
@@ -67,6 +95,10 @@ public final class WeekScheduleViewController: UIViewController, IScheduleViewCo
         self.dateRange = ScheduleDateRange(startDate: start, endDate: end)
         super.init(nibName: nil, bundle: nil)
         weekView.startOfWeek = start
+
+        timeTracker.onTimeUpdate = { [weak self] minutes in
+            self?.weekView.setCurrentTime(minutesSinceMidnight: minutes)
+        }
     }
 
     @available(*, unavailable)
@@ -99,5 +131,26 @@ public final class WeekScheduleViewController: UIViewController, IScheduleViewCo
             weekView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
             weekView.heightAnchor.constraint(equalToConstant: weekView.config.timelineHeight),
         ])
+    }
+
+    public override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        guard !didApplyInitialScroll else { return }
+        didApplyInitialScroll = true
+        if let offset = initialScrollOffsetY {
+            scrollView.contentOffset.y = offset
+        } else {
+            scrollToCurrentTime(animated: false)
+        }
+    }
+
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        timeTracker.startTracking()
+    }
+
+    public override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        timeTracker.stopTracking()
     }
 }

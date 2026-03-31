@@ -23,8 +23,8 @@ final class DayScheduleViewControllerTests: XCTestCase {
         vc.loadViewIfNeeded()
 
         let events = [
-            CalendarEvent(startDate: makeDate(day: 25, hour: 9), endDate: makeDate(day: 25, hour: 10), title: "Встреча"),
-            CalendarEvent(startDate: makeDate(day: 25, hour: 14), endDate: makeDate(day: 25, hour: 15), title: "Обед"),
+            ExampleCalendarEvent(startDate: makeDate(day: 25, hour: 9), endDate: makeDate(day: 25, hour: 10), title: "Встреча"),
+            ExampleCalendarEvent(startDate: makeDate(day: 25, hour: 14), endDate: makeDate(day: 25, hour: 15), title: "Обед"),
         ]
         vc.showEvents(events: events)
 
@@ -44,7 +44,7 @@ final class DayScheduleViewControllerTests: XCTestCase {
         }
 
         vc.showEvents(events: [
-            CalendarEvent(startDate: makeDate(day: 25, hour: 9), endDate: makeDate(day: 25, hour: 10), title: "Test"),
+            ExampleCalendarEvent(startDate: makeDate(day: 25, hour: 9), endDate: makeDate(day: 25, hour: 10), title: "Test"),
         ])
 
         XCTAssertEqual(callCount, 1)

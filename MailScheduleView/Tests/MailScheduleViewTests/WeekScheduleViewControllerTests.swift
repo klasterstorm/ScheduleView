@@ -23,8 +23,8 @@ final class WeekScheduleViewControllerTests: XCTestCase {
         vc.loadViewIfNeeded()
 
         let events = [
-            CalendarEvent(startDate: makeDate(day: 23, hour: 9), endDate: makeDate(day: 23, hour: 10), title: "Понедельник"),
-            CalendarEvent(startDate: makeDate(day: 25, hour: 14), endDate: makeDate(day: 25, hour: 15), title: "Среда"),
+            ExampleCalendarEvent(startDate: makeDate(day: 23, hour: 9), endDate: makeDate(day: 23, hour: 10), title: "Понедельник"),
+            ExampleCalendarEvent(startDate: makeDate(day: 25, hour: 14), endDate: makeDate(day: 25, hour: 15), title: "Среда"),
         ]
         vc.showEvents(events: events)
 
